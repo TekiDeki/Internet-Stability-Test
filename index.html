@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Internet Stability Test · jitter, loss and outages, measured in your browser</title>
+<meta name="description" content="Continuous latency probes measure the real stability of your connection: jitter, lost probes, outages and uptime. One HTML file, no account, nothing uploaded.">
+<meta name="theme-color" content="#f6f3ec">
+<meta property="og:title" content="Internet Stability Test · jitter, loss and outages, measured in your browser">
+<meta property="og:description" content="Continuous latency probes measure the real stability of your connection: jitter, lost probes, outages and uptime.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📡</text></svg>">
+<style>
+:root{
+  --bg:#f6f3ec; --panel:#ffffff; --panel2:#eef3ef; --text:#15251f; --muted:#5e7a6e;
+  --accent:#0f766e; --accent2:#0d9488; --ring:#5eead4;
+  --ok:#1a7f42; --okbg:#e9f5ee; --warn:#92610a; --warnbg:#fdf3df;
+  --bad:#b3261e; --badbg:#fdecea; --info:#1f5f8b;
+  --line:#dbe5dd; --shadow:0 1px 2px rgba(21,37,31,.05),0 14px 38px rgba(21,37,31,.10);
+  --hero-a:#134e4a; --hero-b:#0f766e; --hero-c:#032726;
+}
+[data-theme="dark"]{
+  --bg:#0f1614; --panel:#17211d; --panel2:#1f2d27; --text:#e8f2ec; --muted:#9db8ac;
+  --accent:#2dd4bf; --accent2:#5eead4; --ring:#0d9488;
+  --ok:#71d69c; --okbg:#163327; --warn:#ffd76a; --warnbg:#3a2f14;
+  --bad:#ff9189; --badbg:#3a1f1e; --info:#8ecbf0;
+  --line:#2c3d35; --shadow:0 1px 2px rgba(0,0,0,.45),0 22px 52px rgba(0,0,0,.42);
+  --hero-a:#0d3d38; --hero-b:#0f766e; --hero-c:#021a18;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+::selection{background:var(--accent);color:#fff}
+body{
+  font-family:'Segoe UI',Inter,system-ui,-apple-system,'Noto Sans',sans-serif;
+  background:var(--bg);color:var(--text);min-height:100vh;line-height:1.5;
+  background-image:radial-gradient(620px 420px at 8% 95%,rgba(13,148,136,.08),transparent 60%),
+                   radial-gradient(700px 420px at 95% 5%,rgba(21,95,139,.07),transparent 60%);
+  padding:16px;display:flex;flex-direction:column;align-items:center;
+}
+.wrap{width:100%;max-width:860px;margin:0 auto;display:flex;flex-direction:column;min-height:calc(100vh - 32px)}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:4px 2px}
+.langs{display:flex;gap:5px;flex-wrap:wrap}
+.langbtn,.iconbtn,.homelink{
+  font:inherit;font-size:.78rem;font-weight:700;color:var(--muted);letter-spacing:.03em;
+  background:var(--panel);border:1px solid var(--line);cursor:pointer;transition:.15s;min-height:34px
+}
+.langbtn{border-radius:999px;padding:6px 13px}
+.iconbtn{border-radius:50%;width:36px;height:36px;padding:0;font-size:1rem;display:flex;align-items:center;justify-content:center}
+.langbtn:hover,.iconbtn:hover,.homelink:hover{color:var(--text);border-color:var(--accent)}
+.langbtn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.homelink{display:inline-flex;align-items:center;border-radius:999px;padding:6px 13px;text-decoration:none}
+button:focus-visible,a:focus-visible,select:focus-visible{outline:3px solid var(--ring);outline-offset:2px;border-radius:8px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);overflow:hidden;margin:12px 0}
+header.hero{
+  background:
+    radial-gradient(560px 240px at 88% -20%,rgba(94,234,212,.16),transparent 62%),
+    radial-gradient(420px 200px at 0% 120%,rgba(3,39,38,.55),transparent 60%),
+    linear-gradient(140deg,var(--hero-a) 0%,var(--hero-b) 52%,var(--hero-c) 100%);
+  color:#fff;text-align:center;padding:clamp(36px,7vw,56px) 24px clamp(30px,5vw,42px);
+}
+h1{
+  font-size:clamp(1.7rem,5.4vw,2.8rem);font-weight:900;letter-spacing:-.02em;line-height:1.08;
+  padding:.1em 0 .2em;margin:-.1em 0 -.2em;
+  background:linear-gradient(120deg,#99f6e4 0%,#5eead4 35%,#fff 100%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 3px 10px rgba(0,0,0,.22));
+}
+.hero .lede{font-size:clamp(.95rem,2.6vw,1.12rem);opacity:.94;max-width:560px;margin:14px auto 0;line-height:1.6;font-weight:300}
+.pillrow{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin:18px 0 0}
+.hero .pill{font-size:.77rem;font-weight:700;color:#d9f7f0;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:5px 12px}
+main{padding:clamp(18px,4vw,42px);display:flex;flex-direction:column}
+.page{display:none;animation:fade .35s ease}
+.page.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+h2{font-size:clamp(1.2rem,3.4vw,1.55rem);margin-bottom:14px;line-height:1.3;letter-spacing:-.01em}
+.howto{background:var(--panel2);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:14px;padding:16px 20px;margin:4px 0 24px}
+.howto li{margin:8px 0 8px 18px;color:var(--text);font-size:.95rem}
+.howto ul{list-style:none}
+.howto li::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);margin-right:10px;vertical-align:2px}
+fieldset{border:0;margin:0 0 18px;padding:0}
+label.lbl{display:block;font-size:.8rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
+select{
+  font:inherit;font-size:.95rem;font-weight:600;color:var(--text);background:var(--panel);
+  border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-height:44px;width:100%;max-width:320px;cursor:pointer
+}
+select:hover{border-color:var(--accent)}
+select:disabled{opacity:.5;cursor:not-allowed}
+.optgrid{display:flex;gap:26px;flex-wrap:wrap;margin-bottom:14px}
+.chk{display:flex;align-items:center;gap:10px;font-size:.92rem;font-weight:600;cursor:pointer;margin:6px 0 4px;min-height:34px}
+.chk input{width:18px;height:18px;accent-color:var(--accent)}
+.bigbtn{
+  font:inherit;font-size:1.05rem;font-weight:800;letter-spacing:.01em;color:#fff;
+  background:linear-gradient(140deg,var(--accent) 0%,var(--accent2) 100%);
+  border:0;border-radius:14px;padding:14px 30px;min-height:52px;cursor:pointer;
+  box-shadow:0 10px 24px rgba(13,148,136,.28);transition:.15s
+}
+.bigbtn:hover{filter:brightness(1.06)}
+.bigbtn:disabled{opacity:.55;cursor:not-allowed;box-shadow:none}
+.stopbtn{background:linear-gradient(140deg,#9f2f24 0%,#c03d2e 100%);box-shadow:0 10px 24px rgba(159,47,36,.25)}
+.note{font-size:.83rem;color:var(--muted);margin-top:10px;line-height:1.55}
+.livebar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.st{display:inline-flex;align-items:center;gap:8px;font-size:.82rem;font-weight:800;letter-spacing:.03em;border-radius:999px;padding:6px 14px;border:1px solid var(--line);background:var(--panel2);color:var(--muted);text-transform:uppercase}
+.st .dot{width:9px;height:9px;border-radius:50%;background:var(--muted);flex:0 0 auto}
+.st-on{color:var(--ok);background:var(--okbg);border-color:var(--ok)}
+.st-on .dot{background:var(--ok);animation:pulse 1.6s infinite}
+.st-lost{color:var(--warn);background:var(--warnbg);border-color:var(--warn)}
+.st-lost .dot{background:var(--warn)}
+.st-off{color:var(--bad);background:var(--badbg);border-color:var(--bad)}
+.st-off .dot{background:var(--bad);animation:pulse 1.6s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(13,148,136,.35)}70%{box-shadow:0 0 0 9px rgba(13,148,136,0)}100%{box-shadow:0 0 0 0 rgba(13,148,136,0)}}
+.now{display:flex;align-items:baseline;justify-content:center;gap:10px;margin:6px 0 2px;flex-wrap:wrap}
+.bignum{font-size:clamp(3rem,10vw,4.6rem);font-weight:900;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1}
+.bignum.lost{color:var(--bad)}
+.bignum.warm{color:var(--muted)}
+.unit{font-size:1.2rem;font-weight:700;color:var(--muted)}
+.nowlbl{text-align:center;font-size:.8rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.metaline{display:flex;justify-content:center;gap:22px;flex-wrap:wrap;margin:6px 0 14px;font-size:.9rem;color:var(--muted)}
+.metaline b{color:var(--text);font-variant-numeric:tabular-nums}
+canvas{display:block;width:100%;border-radius:12px;background:var(--panel2);border:1px solid var(--line)}
+#spark{height:110px;margin:8px 0 18px}
+#chart{height:240px;margin:8px 0 6px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.78rem;color:var(--muted);margin:4px 0 0}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block;flex:0 0 auto}
+.lg-ok{background:#34a853}.lg-mid{background:#f2a600}.lg-bad{background:#e04b3a}.lg-lost{background:#b3261e;transform:rotate(45deg);border-radius:2px}.lg-out{background:rgba(224,75,58,.25);border:1px solid rgba(224,75,58,.5)}
+.statgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:6px}
+@media(min-width:560px){.statgrid{grid-template-columns:repeat(4,1fr)}}
+.stat{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:12px 10px;text-align:center}
+.stat b{display:block;font-size:1.25rem;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.stat span{display:block;font-size:.72rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+.vbox{border-radius:16px;padding:16px 20px;border:1px solid var(--line);background:var(--panel2)}
+.v-stable{background:var(--okbg);border-color:var(--ok)}
+.v-mostly{background:var(--okbg);border-color:var(--accent)}
+.v-unstable{background:var(--warnbg);border-color:var(--warn)}
+.v-poor{background:var(--badbg);border-color:var(--bad)}
+.vhead{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.vword{font-size:1.35rem;font-weight:900;letter-spacing:-.01em}
+.vtag{font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:4px 12px;color:#fff}
+.t-stable{background:#1a7f42}.t-mostly{background:#0f766e}.t-unstable{background:#92610a}.t-poor{background:#b3261e}
+.vdesc{margin-top:8px;font-size:.95rem;line-height:1.6}
+.thresh{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);font-size:.82rem;color:var(--muted);line-height:1.7}
+.outrow{display:flex;justify-content:space-between;gap:10px;padding:9px 4px;border-bottom:1px solid var(--line);font-size:.9rem;flex-wrap:wrap}
+.outrow:last-child{border-bottom:0}
+.outrow b{font-variant-numeric:tabular-nums}
+.outrow .dur{color:var(--bad);font-weight:800}
+.btnrow{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px}
+.minibtn{
+  font:inherit;font-size:.9rem;font-weight:700;color:var(--accent);background:var(--panel2);
+  border:1px solid var(--line);border-radius:12px;padding:10px 18px;min-height:44px;cursor:pointer;transition:.15s
+}
+.minibtn:hover{border-color:var(--accent);color:var(--text)}
+.minibtn.danger{color:var(--bad)}
+.histrow{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--line);flex-wrap:wrap;font-size:.9rem}
+.histrow:last-child{border-bottom:0}
+.histrow .when{font-weight:800;min-width:150px}
+.histrow .nums{color:var(--muted);font-variant-numeric:tabular-nums;flex:1;min-width:180px}
+.histrow .del{background:none;border:0;color:var(--muted);font-size:1rem;cursor:pointer;padding:6px;border-radius:8px;min-height:36px}
+.histrow .del:hover{color:var(--bad)}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;color:var(--muted);background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:5px 12px;margin:2px 0 8px}
+footer{padding:18px 8px 6px;text-align:center;color:var(--muted);font-size:.82rem;line-height:1.75}
+footer a{color:var(--accent);font-weight:700;text-decoration:none}
+footer a:hover{text-decoration:underline}
+footer .sep{margin:0 7px;opacity:.45}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <a class="homelink" href="https://freehtml.dev/">&#8592; <span data-i="home">Home</span></a>
+    <div style="display:flex;gap:8px;align-items:center">
+      <div class="langs">
+        <button class="langbtn" data-lang="en" aria-pressed="true">EN</button>
+        <button class="langbtn" data-lang="ro" aria-pressed="false">RO</button>
+        <button class="langbtn" data-lang="sr-cyrl" aria-pressed="false">&#1032;IR</button>
+        <button class="langbtn" data-lang="sr-latn" aria-pressed="false">SR</button>
+      </div>
+      <button class="iconbtn" id="themebtn" title="Switch theme" aria-label="Switch theme">&#127769;</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <header class="hero">
+      <h1 data-i="h1">Internet Stability Test</h1>
+      <p class="lede" data-i="lede">Runs continuous latency probes against a public endpoint, then tells you the truth about your connection: jitter, lost probes, outages - how stable it really is. Everything runs in your browser; nothing is uploaded.</p>
+      <div class="pillrow">
+        <span class="pill" data-i="pillA">no account</span>
+        <span class="pill" data-i="pillB">nothing uploaded</span>
+        <span class="pill" data-i="pillC">one HTML file</span>
+      </div>
+    </header>
+    <main>
+      <div class="howto">
+        <h2 data-i="howH">How the measurement works</h2>
+        <ul>
+          <li data-i="how1">Every few seconds a tiny request is sent to the chosen public endpoint and the round-trip time is recorded - like a ping, but over HTTPS, so values run slightly higher.</li>
+          <li data-i="how2">A probe that gets no answer within 4 seconds counts as lost. Three or more lost in a row count as an outage, and its duration is measured. Each probe waits for the previous one.</li>
+          <li data-i="how3">The loop runs in a web worker and the results stay in your browser. Nothing is uploaded and nothing leaves the page except the probes themselves.</li>
+        </ul>
+      </div>
+
+      <section class="page on" id="setup">
+        <h2 data-i="setupH">Set up the test</h2>
+        <div class="optgrid">
+          <fieldset>
+            <label class="lbl" for="dur" data-i="durL">Duration</label>
+            <select id="dur">
+              <option value="5" data-i="dur5">5 minutes</option>
+              <option value="15" data-i="dur15">15 minutes</option>
+              <option value="30" selected data-i="dur30">30 minutes</option>
+              <option value="60" data-i="dur60">60 minutes</option>
+              <option value="240" data-i="dur240">4 hours</option>
+              <option value="0" data-i="dur0">until stopped</option>
+            </select>
+          </fieldset>
+          <fieldset>
+            <label class="lbl" for="int" data-i="intL">Probe interval</label>
+            <select id="int">
+              <option value="1000" data-i="int1">1 second</option>
+              <option value="2000" selected data-i="int2">2 seconds</option>
+              <option value="5000" data-i="int5">5 seconds</option>
+              <option value="10000" data-i="int10">10 seconds</option>
+            </select>
+          </fieldset>
+          <fieldset>
+            <label class="lbl" for="tgt" data-i="tgtL">Probe target</label>
+            <select id="tgt">
+              <option value="cf" selected data-i="tgtCF">Cloudflare (default)</option>
+              <option value="gg" data-i="tgtGG">Google</option>
+              <option value="so" data-i="tgtSO">this site</option>
+            </select>
+          </fieldset>
+        </div>
+        <label class="chk hidden" id="wakewrap"><input type="checkbox" id="wake" checked><span data-i="wakeL">Keep the screen awake</span></label>
+        <button class="bigbtn" id="startbtn" data-i="startBtn">Start the test</button>
+        <p class="note" data-i="keepNote">The probe loop keeps running in a background tab; just keep the tab open. The screen-awake option needs a visible tab.</p>
+      </section>
+
+      <section class="page" id="live">
+        <div class="livebar">
+          <span class="st" id="status"><span class="dot"></span><span id="statusTxt" data-i="stWarm">warming up</span></span>
+          <button class="bigbtn stopbtn" id="stopbtn" data-i="stopBtn">Stop and see the verdict</button>
+        </div>
+        <div class="now">
+          <span class="bignum warm" id="bignum">-</span>
+          <span class="unit" data-i="unit">ms</span>
+        </div>
+        <div class="nowlbl" data-i="curL">latency now</div>
+        <div class="metaline">
+          <span><span data-i="elL">elapsed</span> <b id="elapsed">0:00</b></span>
+          <span id="remwrap" class="hidden"><span data-i="remL">remaining</span> <b id="remaining">-</b></span>
+          <span><span data-i="prL">probes</span> <b id="pcount">0</b></span>
+        </div>
+        <span class="chip hidden" id="connchip"></span>
+        <canvas id="spark" role="img" aria-label="recent latency"></canvas>
+      </section>
+
+      <section class="page" id="results">
+        <h2 data-i="statsH">The numbers so far</h2>
+        <div class="statgrid">
+          <div class="stat"><b id="sAvg">-</b><span data-i="sAvg">average</span></div>
+          <div class="stat"><b id="sJit">-</b><span data-i="sJit">jitter</span></div>
+          <div class="stat"><b id="sLoss">-</b><span data-i="sLoss">lost probes</span></div>
+          <div class="stat"><b id="sUp">-</b><span data-i="sUp">uptime</span></div>
+          <div class="stat"><b id="sMin">-</b><span data-i="sMin">minimum</span></div>
+          <div class="stat"><b id="sMax">-</b><span data-i="sMax">maximum</span></div>
+          <div class="stat"><b id="sOut">-</b><span data-i="sOut">outages</span></div>
+          <div class="stat"><b id="sDown">-</b><span data-i="sDown">downtime</span></div>
+        </div>
+        <h2 style="margin-top:26px" data-i="chartH">Timeline</h2>
+        <canvas id="chart" role="img" aria-label="latency timeline"></canvas>
+        <div class="legend">
+          <span><i class="lg-ok"></i><span data-i="legOK">under 60 ms</span></span>
+          <span><i class="lg-mid"></i><span data-i="legMid">under 150 ms</span></span>
+          <span><i class="lg-bad"></i><span data-i="legBad">over 150 ms</span></span>
+          <span><i class="lg-lost"></i><span data-i="legLost">lost probe</span></span>
+          <span><i class="lg-out"></i><span data-i="legOut">outage</span></span>
+        </div>
+        <div class="vbox v-init" id="verdict" style="margin-top:26px">
+          <div class="vhead">
+            <span class="vword" id="vword" data-i="verH">Verdict</span>
+            <span class="vtag t-stable hidden" id="vtag"></span>
+          </div>
+          <p class="vdesc" id="vdesc" data-i="vNoData">Not enough probes yet - the verdict appears once the first ones land.</p>
+          <div class="thresh">
+            <b data-i="thH">How the verdict is decided:</b><br>
+            <span data-i="th1">Stable: 0% lost, 0 outages, jitter under 15 ms, average under 150 ms.</span><br>
+            <span data-i="th2">Mostly stable: under 1% lost, 0 outages, jitter under 40 ms.</span><br>
+            <span data-i="th3">Unstable: under 5% lost and at most 2 outages.</span><br>
+            <span data-i="th4">Poor: anything worse, or downtime over 3% of the run.</span>
+          </div>
+        </div>
+        <div id="outwrap" class="hidden" style="margin-top:18px">
+          <h2 data-i="outH">Outages</h2>
+          <div id="outlist"></div>
+        </div>
+        <div class="btnrow" style="margin-top:18px">
+          <button class="minibtn" id="copybtn" data-i="copyBtn">Copy the report</button>
+          <button class="minibtn" id="dlbtn" data-i="dlBtn">Download full data (JSON)</button>
+        </div>
+        <p class="note" id="copiednote" style="display:none" data-i="copied">Copied.</p>
+      </section>
+
+      <section class="page" id="history">
+        <h2 data-i="histH">Previous runs</h2>
+        <div id="histlist"></div>
+        <p class="note" id="histempty" data-i="histEmpty">No finished runs yet.</p>
+        <div class="btnrow"><button class="minibtn danger hidden" id="clearbtn" data-i="clearBtn">Clear history</button></div>
+      </section>
+    </main>
+  </div>
+
+  <footer>
+    <span data-i="offlineNote">One HTML file. Works offline, no account, no ads, no tracking.</span><br>
+    <span data-i="supportText">The tool is free and stays free.</span>
+    <a href="https://PayPal.me/TekiDeki" target="_blank" rel="noopener">&#10084;&#65039; <span data-i="supportLink">Support the work</span></a>
+    <span class="sep">&middot;</span>
+    <a href="https://github.com/TekiDeki" target="_blank" rel="noopener" data-i="report">Spotted a mistake? Tell me.</a>
+  </footer>
+</div>
+
+<script>
+"use strict";
+var L={
+"en":{
+ h1:"Internet Stability Test",
+ lede:"Runs continuous latency probes against a public endpoint, then tells you the truth about your connection: jitter, lost probes, outages - how stable it really is. Everything runs in your browser; nothing is uploaded.",
+ pillA:"no account", pillB:"nothing uploaded", pillC:"one HTML file",
+ howH:"How the measurement works",
+ how1:"Every few seconds a tiny request is sent to the chosen public endpoint and the round-trip time is recorded - like a ping, but over HTTPS, so values run slightly higher.",
+ how2:"A probe that gets no answer within 4 seconds counts as lost. Three or more lost in a row count as an outage, and its duration is measured. Each probe waits for the previous one.",
+ how3:"The loop runs in a web worker and the results stay in your browser. Nothing is uploaded and nothing leaves the page except the probes themselves.",
+ setupH:"Set up the test",
+ durL:"Duration", dur5:"5 minutes", dur15:"15 minutes", dur30:"30 minutes", dur60:"60 minutes", dur240:"4 hours", dur0:"until stopped",
+ intL:"Probe interval", int1:"1 second", int2:"2 seconds", int5:"5 seconds", int10:"10 seconds",
+ tgtL:"Probe target", tgtCF:"Cloudflare (default)", tgtGG:"Google", tgtSO:"this site",
+ wakeL:"Keep the screen awake",
+ keepNote:"The probe loop keeps running in a background tab; just keep the tab open. The screen-awake option needs a visible tab.",
+ startBtn:"Start the test",
+ stWarm:"warming up", stOn:"online", stLost:"probe lost", stOff:"offline",
+ unit:"ms", curL:"latency now", elL:"elapsed", remL:"remaining", prL:"probes",
+ stopBtn:"Stop and see the verdict",
+ statsH:"The numbers so far",
+ sAvg:"average", sJit:"jitter", sLoss:"lost probes", sUp:"uptime", sMin:"minimum", sMax:"maximum", sOut:"outages", sDown:"downtime",
+ chartH:"Timeline", legOK:"under 60 ms", legMid:"under 150 ms", legBad:"over 150 ms", legLost:"lost probe", legOut:"outage",
+ verH:"Verdict", vNoData:"Not enough probes yet - the verdict appears once the first ones land.",
+ vStable:"Stable", vMostly:"Mostly stable", vUnstable:"Unstable", vPoor:"Poor connection",
+ vStableD:"No lost probes, no outages, low jitter. This is what a healthy line looks like.",
+ vMostlyD:"Solid overall, with spikes. Isolated spikes usually come from Wi-Fi or the router; a cable usually removes them.",
+ vUnstableD:"Latency jumps or probes are being lost. Restart the router, prefer a cable and pause heavy uploads - both make this worse.",
+ vPoorD:"Frequent loss or outages. Run a 30+ minute test, download the report and hand it to your provider - the outage bands are your evidence.",
+ thH:"How the verdict is decided:",
+ th1:"Stable: 0% lost, 0 outages, jitter under 15 ms, average under 150 ms.",
+ th2:"Mostly stable: under 1% lost, 0 outages, jitter under 40 ms.",
+ th3:"Unstable: under 5% lost and at most 2 outages.",
+ th4:"Poor: anything worse, or downtime over 3% of the run.",
+ outH:"Outages", outNone:"No outages so far.",
+ copyBtn:"Copy the report", dlBtn:"Download full data (JSON)", copied:"Copied.",
+ histH:"Previous runs", histEmpty:"No finished runs yet.", clearBtn:"Clear history", reallyBtn:"Really clear?", delOne:"delete this run",
+ offlineNote:"One HTML file. Works offline, no account, no ads, no tracking.",
+ supportText:"The tool is free and stays free.", supportLink:"Support the work", report:"Spotted a mistake? Tell me.",
+ home:"Home", theme:"Switch theme",
+ repTitle:"Internet Stability Test - report", repStarted:"Started", repDuration:"Duration", repInterval:"Interval", repTarget:"Target",
+ repProbes:"Probes", repLatency:"Latency", repUptime:"Uptime", repOutages:"Outages", repVerdict:"Verdict",
+ repGen:"Generated in the browser by the Internet Stability Test (one HTML file, no upload).",
+ connEst:"browser estimate"
+},
+"ro":{
+ h1:"Test de stabilitate a internetului",
+ lede:"Trimite continuu sonde de latență către un punct public și îți spune adevărul despre conexiune: jitter, sonde pierdute, căderi - cât de stabilă e de-adevăratelea. Totul rulează în browserul tău; nimic nu se încarcă nicăieri.",
+ pillA:"fără cont", pillB:"nimic încărcat", pillC:"un singur fișier HTML",
+ howH:"Cum funcționează măsurătoarea",
+ how1:"La fiecare câteva secunde se trimite o cerere minusculă către punctul public ales și se măsoară timpul dus-întors - ca un ping, dar peste HTTPS, deci valorile ies puțin mai mari.",
+ how2:"O sondă fără răspuns în 4 secunde e pierdută. Trei sau mai multe pierdute la rând înseamnă cădere, iar durata ei se măsoară. Fiecare sondă așteaptă finalizarea celei dinainte.",
+ how3:"Bucla rulează într-un web worker, iar rezultatele rămân în browserul tău. Nimic nu se trimite nicăieri - în afara sondelor înseși.",
+ setupH:"Setează testul",
+ durL:"Durată", dur5:"5 minute", dur15:"15 minute", dur30:"30 de minute", dur60:"60 de minute", dur240:"4 ore", dur0:"până la oprire",
+ intL:"Intervalul sondei", int1:"1 secundă", int2:"2 secunde", int5:"5 secunde", int10:"10 secunde",
+ tgtL:"Ținta sondelor", tgtCF:"Cloudflare (implicit)", tgtGG:"Google", tgtSO:"acest site",
+ wakeL:"Ține ecranul treaz",
+ keepNote:"Bucla continuă și în tabul din fundal; e suficient să lași tabul deschis. Opțiunea de ecran treaz cere tabul vizibil.",
+ startBtn:"Pornește testul",
+ stWarm:"încălzire", stOn:"online", stLost:"sondă pierdută", stOff:"deconectat",
+ unit:"ms", curL:"latență acum", elL:"trecut", remL:"rămas", prL:"sonde",
+ stopBtn:"Oprește și vezi verdictul",
+ statsH:"Cifrele de până acum",
+ sAvg:"medie", sJit:"jitter", sLoss:"sonde pierdute", sUp:"timp activ", sMin:"minim", sMax:"maxim", sOut:"căderi", sDown:"timp căzut",
+ chartH:"Cronologie", legOK:"sub 60 ms", legMid:"sub 150 ms", legBad:"peste 150 ms", legLost:"sondă pierdută", legOut:"cădere",
+ verH:"Verdict", vNoData:"Încă prea puține sonde - verdictul apare după ce aterizează primele.",
+ vStable:"Stabilă", vMostly:"În mare stabilă", vUnstable:"Instabilă", vPoor:"Conexiune slabă",
+ vStableD:"Zero sonde pierdute, zero căderi, jitter mic. Așa arată o linie sănătoasă.",
+ vMostlyD:"Solidă în ansamblu, cu vârfuri izolate. Vârfurile vin de obicei din Wi-Fi sau din router; un cablu le elimină de regulă.",
+ vUnstableD:"Latența sare sau sondele se pierd. Repornește routerul, preferă cablul și pune pe pauză încărcările mari - le înrăutățesc pe ambele.",
+ vPoorD:"Pierderi sau căderi frecvente. Rulează un test de 30+ minute, descarcă raportul și dă-l furnizorului - benzile de cădere sunt dovada ta.",
+ thH:"Cum se decide verdictul:",
+ th1:"Stabilă: 0% pierdute, 0 căderi, jitter sub 15 ms, medie sub 150 ms.",
+ th2:"În mare stabilă: sub 1% pierdute, 0 căderi, jitter sub 40 ms.",
+ th3:"Instabilă: sub 5% pierdute și cel mult 2 căderi.",
+ th4:"Slabă: orice mai rău de atât, sau timp căzut peste 3% din rulare.",
+ outH:"Căderi", outNone:"Nicio cădere până acum.",
+ copyBtn:"Copiază raportul", dlBtn:"Descarcă datele complete (JSON)", copied:"Copiat.",
+ histH:"Rulări anterioare", histEmpty:"Nicio rulare terminată încă.", clearBtn:"Șterge istoricul", reallyBtn:"Sigur șterg?", delOne:"șterge rularea",
+ offlineNote:"Un singur fișier HTML. Funcționează offline, fără cont, fără reclame, fără urmărire.",
+ supportText:"Unealta e gratuită și rămâne gratuită.", supportLink:"Susține munca", report:"Ai văzut o greșeală? Zi-mi.",
+ home:"Acasă", theme:"Schimbă tema",
+ repTitle:"Raport - Test de stabilitate a internetului", repStarted:"Început", repDuration:"Durată", repInterval:"Interval", repTarget:"Țintă",
+ repProbes:"Sonde", repLatency:"Latență", repUptime:"Timp activ", repOutages:"Căderi", repVerdict:"Verdict",
+ repGen:"Generat în browser de Testul de stabilitate a internetului (un singur fișier HTML, fără încărcări).",
+ connEst:"estimarea browserului"
+},
+"sr-cyrl":{
+ h1:"Тест стабилности интернета",
+ lede:"Непрекидно шаље сонде латенције ка јавној тачки и говори ти истину о вези: џитер, изгубљене сонде, прекиди - колико је заиста стабилна. Све ради у твом прегледачу; ништа се не шаље нигде.",
+ pillA:"без налога", pillB:"ништа се не шаље", pillC:"један HTML фајл",
+ howH:"Како мерење ради",
+ how1:"Сваких неколико секунди шаље се ситан захтев изабраној јавној тачки и мери време тамо-и-назад - као пинг, али преко HTTPS-а, па вредности излазе мало веће.",
+ how2:"Сонда без одговора у 4 секунде сматра се изгубљеном. Три или више изгубљених заредом значе прекид, и мери му се трајање. Свака сонда чека да се претходна заврши.",
+ how3:"Петља ради у веб воркеру, а резултати остају у твом прегледачу. Ништа се не шаље нигде - осим самих сонди.",
+ setupH:"Подеси тест",
+ durL:"Трајање", dur5:"5 минута", dur15:"15 минута", dur30:"30 минута", dur60:"60 минута", dur240:"4 сата", dur0:"док се не заустави",
+ intL:"Интервал сонди", int1:"1 секунда", int2:"2 секунде", int5:"5 секунди", int10:"10 секунди",
+ tgtL:"Циљ сонди", tgtCF:"Cloudflare (подразумевано)", tgtGG:"Гугл (Google)", tgtSO:"овај сајт",
+ wakeL:"Држи екран будним",
+ keepNote:"Петља наставља и у позадинској картици; довољно је да картица остане отворена. Опција будног екрана тражи видљиву картицу.",
+ startBtn:"Започни тест",
+ stWarm:"загревање", stOn:"на мрежи", stLost:"сонда изгубљена", stOff:"нема везе",
+ unit:"мс", curL:"латенција сада", elL:"прошло", remL:"остало", prL:"сонде",
+ stopBtn:"Заустави и види пресуду",
+ statsH:"Бројке до сада",
+ sAvg:"просек", sJit:"џитер", sLoss:"изгубљене сонде", sUp:"време рада", sMin:"минимум", sMax:"максимум", sOut:"прекиди", sDown:"време прекида",
+ chartH:"Временска линија", legOK:"испод 60 мс", legMid:"испод 150 мс", legBad:"преко 150 мс", legLost:"изгубљена сонда", legOut:"прекид",
+ verH:"Пресуда", vNoData:"Још премало сонди - пресуда се појављује кад стигну прве.",
+ vStable:"Стабилна", vMostly:"Углавном стабилна", vUnstable:"Нестабилна", vPoor:"Лоша веза",
+ vStableD:"Ниједна сонда изгубљена, ниједан прекид, мали џитер. Овако изгледа здрава линија.",
+ vMostlyD:"Солидна у целини, са појединачним скоковима. Скокови обично долазе од Wi-Fi-ја или рутера; кабл их обично уклања.",
+ vUnstableD:"Латенција скаче или се сонде губе. Поново покрени рутер, преферирај кабл и заустави велика отпремања - и једно и друго то погоршава.",
+ vPoorD:"Чести губици или прекиди. Покрени тест од 30+ минута, преузми извештај и предај га провајдеру - траке прекида су твој доказ.",
+ thH:"Како се пресуда доноси:",
+ th1:"Стабилна: 0% изгубљених, 0 прекида, џитер испод 15 мс, просек испод 150 мс.",
+ th2:"Углавном стабилна: испод 1% изгубљених, 0 прекида, џитер испод 40 мс.",
+ th3:"Нестабилна: испод 5% изгубљених и највише 2 прекида.",
+ th4:"Лоша: све горе од тога, или време прекида преко 3% трајања.",
+ outH:"Прекиди", outNone:"Нема прекида до сада.",
+ copyBtn:"Копирај извештај", dlBtn:"Преузми све податке (JSON)", copied:"Копирано.",
+ histH:"Претходна покретања", histEmpty:"Још нема завршених покретања.", clearBtn:"Обриши историју", reallyBtn:"Заиста обрисати?", delOne:"обриши ово покретање",
+ offlineNote:"Један HTML фајл. Ради офлајн, без налога, без реклама, без праћења.",
+ supportText:"Алатка је бесплатна и остаје бесплатна.", supportLink:"Подржи рад", report:"Видео си грешку? Јави ми.",
+ home:"Почетна", theme:"Промени тему",
+ repTitle:"Извештај - тест стабилности интернета", repStarted:"Започето", repDuration:"Трајање", repInterval:"Интервал", repTarget:"Циљ",
+ repProbes:"Сонде", repLatency:"Латенција", repUptime:"Време рада", repOutages:"Прекиди", repVerdict:"Пресуда",
+ repGen:"Направљено у прегледачу, тест стабилности интернета (један HTML фајл, без слања).",
+ connEst:"процена прегледача"
+},
+"sr-latn":{
+ h1:"Test stabilnosti interneta",
+ lede:"Neprekidno šalje sonde latencije ka javnoj tački i govori ti istinu o vezi: džiter, izgubljene sonde, prekidi - koliko je zaista stabilna. Sve radi u tvom pregledaču; ništa se ne šalje nigde.",
+ pillA:"bez naloga", pillB:"ništa se ne šalje", pillC:"jedan HTML fajl",
+ howH:"Kako merenje radi",
+ how1:"Svakih nekoliko sekundi šalje se sitan zahtev izabranoj javnoj tački i meri vreme tamo-i-nazad - kao ping, ali preko HTTPS-a, pa vrednosti izlaze malo veće.",
+ how2:"Sonda bez odgovora u 4 sekunde smatra se izgubljenom. Tri ili više izgubljenih zaredom znače prekid, i meri mu se trajanje. Svaka sonda čeka da se prethodna završi.",
+ how3:"Petlja radi u veb vorkeru, a rezultati ostaju u tvom pregledaču. Ništa se ne šalje nigde - osim samih sondi.",
+ setupH:"Podesi test",
+ durL:"Trajanje", dur5:"5 minuta", dur15:"15 minuta", dur30:"30 minuta", dur60:"60 minuta", dur240:"4 sata", dur0:"dok se ne zaustavi",
+ intL:"Interval sondi", int1:"1 sekunda", int2:"2 sekunde", int5:"5 sekundi", int10:"10 sekundi",
+ tgtL:"Cilj sondi", tgtCF:"Cloudflare (podrazumevano)", tgtGG:"Gugl (Google)", tgtSO:"ovaj sajt",
+ wakeL:"Drži ekran budnim",
+ keepNote:"Petlja nastavlja i u pozadinskoj kartici; dovoljno je da kartica ostane otvorena. Opcija budnog ekrana traži vidljivu karticu.",
+ startBtn:"Započni test",
+ stWarm:"zagrevanje", stOn:"na mreži", stLost:"sonda izgubljena", stOff:"nema veze",
+ unit:"ms", curL:"latencija sada", elL:"prošlo", remL:"ostalo", prL:"sonde",
+ stopBtn:"Zaustavi i vidi presudu",
+ statsH:"Brojke do sada",
+ sAvg:"prosek", sJit:"džiter", sLoss:"izgubljene sonde", sUp:"vreme rada", sMin:"minimum", sMax:"maksimum", sOut:"prekidi", sDown:"vreme prekida",
+ chartH:"Vremenska linija", legOK:"ispod 60 ms", legMid:"ispod 150 ms", legBad:"preko 150 ms", legLost:"izgubljena sonda", legOut:"prekid",
+ verH:"Presuda", vNoData:"Još premalo sondi - presuda se pojavljuje kad stignu prve.",
+ vStable:"Stabilna", vMostly:"Uglavnom stabilna", vUnstable:"Nestabilna", vPoor:"Loša veza",
+ vStableD:"Nijedna sonda izgubljena, nijedan prekid, mali džiter. Ovako izgleda zdrava linija.",
+ vMostlyD:"Solidna u celini, sa pojedinačnim skokovima. Skokovi obično dolaze od Wi-Fi-ja ili rutera; kabl ih obično uklanja.",
+ vUnstableD:"Latencija skače ili se sonde gube. Ponovo pokreni ruter, preferiraj kabl i zaustavi velika otpremanja - i jedno i drugo to pogoršava.",
+ vPoorD:"Česti gubici ili prekidi. Pokreni test od 30+ minuta, preuzmi izveštaj i predaj ga provajderu - trake prekida su tvoj dokaz.",
+ thH:"Kako se presuda donosi:",
+ th1:"Stabilna: 0% izgubljenih, 0 prekida, džiter ispod 15 ms, prosek ispod 150 ms.",
+ th2:"Uglavnom stabilna: ispod 1% izgubljenih, 0 prekida, džiter ispod 40 ms.",
+ th3:"Nestabilna: ispod 5% izgubljenih i najviše 2 prekida.",
+ th4:"Loša: sve gore od toga, ili vreme prekida preko 3% trajanja.",
+ outH:"Prekidi", outNone:"Nema prekida do sada.",
+ copyBtn:"Kopiraj izveštaj", dlBtn:"Preuzmi sve podatke (JSON)", copied:"Kopirano.",
+ histH:"Prethodna pokretanja", histEmpty:"Još nema završenih pokretanja.", clearBtn:"Obriši istoriju", reallyBtn:"Zaista obrisati?", delOne:"obriši ovo pokretanje",
+ offlineNote:"Jedan HTML fajl. Radi oflajn, bez naloga, bez reklama, bez praćenja.",
+ supportText:"Alatka je besplatna i ostaje besplatna.", supportLink:"Podrži rad", report:"Video si grešku? Javi mi.",
+ home:"Početna", theme:"Promeni temu",
+ repTitle:"Izveštaj - test stabilnosti interneta", repStarted:"Započeto", repDuration:"Trajanje", repInterval:"Interval", repTarget:"Cilj",
+ repProbes:"Sonde", repLatency:"Latencija", repUptime:"Vreme rada", repOutages:"Prekidi", repVerdict:"Presuda",
+ repGen:"Napravljeno u pregledaču, test stabilnosti interneta (jedan HTML fajl, bez slanja).",
+ connEst:"procena pregledača"
+}
+};
+/* ---------- state */
+var LANGS=["en","ro","sr-cyrl","sr-latn"];
+var LOCALE={"en":"en-GB","ro":"ro-RO","sr-cyrl":"sr-Cyrl-RS","sr-latn":"sr-Latn-RS"};
+var TARGETS={
+ cf:{url:"https://cp.cloudflare.com/generate_204",name:"Cloudflare"},
+ gg:{url:"https://www.gstatic.com/generate_204",name:"Google"},
+ so:{url:"",name:"self"}
+};
+var lang="en";
+var running=false, startAt=0, stopAt=0, warmLeft=0;
+var cfg={dur:30,int:2000,tgt:"cf",wake:true};
+var PROBES=[];           /* {t: epoch ms, ms: number|null} */
+var outages=[];          /* {s: epoch ms, e: epoch ms} */
+var lostStreak=0, maybeStart=0, outageOpen=false, outageStart=0;
+var worker=null, fallbackTimer=null, fallbackBusy=false;
+var wakeLock=null;
+var statusMode=null;
+var statusMode=null;
+
+function $(s){return document.querySelector(s)}
+function store(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem("ciq-"+k)||"null");localStorage.setItem("ciq-"+k,JSON.stringify(v))}catch(e){return null}}
+function hstore(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem("ist-"+k)||"null");localStorage.setItem("ist-"+k,JSON.stringify(v))}catch(e){return null}}
+function t(k){var v=L[lang][k];return typeof v==="string"?v:k}
+
+function setLang(l){
+  lang=LANGS.indexOf(l)>-1?l:"en"; store("lang",lang);
+  document.documentElement.lang=lang==="sr-cyrl"?"sr-Cyrl":(lang==="sr-latn"?"sr-Latn":lang);
+  var btns=document.querySelectorAll(".langbtn");
+  for(var i=0;i<btns.length;i++)btns[i].setAttribute("aria-pressed",btns[i].getAttribute("data-lang")===lang?"true":"false");
+  var els=document.querySelectorAll("[data-i]");
+  for(var j=0;j<els.length;j++){var k=els[j].getAttribute("data-i");if(L[lang][k]!==undefined)els[j].textContent=L[lang][k]}
+  var tb=$("#themebtn"); tb.title=t("theme"); tb.setAttribute("aria-label",t("theme"));
+  document.title=t("h1")+" · "+t("sJit")+", "+t("sLoss")+", "+t("sOut");
+  renderOutages(); renderHistory(); updateLiveText(); drawSpark(); drawChart();
+  if(PROBES.length){updateStats();updateVerdict()}
+  setStatus(statusMode);
+}
+function setTheme(th){
+  document.documentElement.setAttribute("data-theme",th);store("theme",th);
+  var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",th==="dark"?"#0f1614":"#f6f3ec");
+  $("#themebtn").textContent=th==="dark"?"☀":"🌙";
+  drawSpark();drawChart();
+}
+
+/* ---------- probe engine (web worker, with main-thread fallback) ---------- */
+var WSRC =
+"var iv=2000,to=4000,url='',alive=false,ctl=null;" +
+"function qs(u){return u+(u.indexOf('?')>-1?'&':'?')}" +
+"function go(){" +
+" if(!alive)return;" +
+" ctl=new AbortController();var s=performance.now();var tm=setTimeout(function(){ctl.abort()},to);" +
+" fetch(qs(url)+'ist='+Date.now(),{mode:'no-cors',cache:'no-store',signal:ctl.signal})" +
+"  .then(function(){clearTimeout(tm);postMessage({ok:1,ms:performance.now()-s})})" +
+"  .catch(function(){clearTimeout(tm);postMessage({ok:0})})" +
+"  .then(function(){setTimeout(go,iv)})" +
+"}" +
+"onmessage=function(e){var d=e.data;" +
+" if(d.cmd==='start'){iv=d.iv;to=d.to;url=d.url;alive=true;go()}" +
+" else if(d.cmd==='stop'){alive=false;if(ctl)ctl.abort()}" +
+"};";
+
+function probeUrl(){
+  var k=cfg.tgt;
+  if(k==="so"){
+    var base=location.href.split("#")[0].split("?")[0];
+    return base.replace(/\/[^\/]*$/,"/")+"?ist=1";
+  }
+  return TARGETS[k].url;
+}
+function fallbackProbe(){
+  if(!running)return;
+  if(fallbackBusy){fallbackTimer=setTimeout(fallbackProbe,cfg.int);return}
+  fallbackBusy=true;
+  var ctl=new AbortController();
+  var tm=setTimeout(function(){ctl.abort()},4000);
+  var s=performance.now();
+  var purl=probeUrl();
+  fetch(purl+(purl.indexOf("?")>-1?"&":"?")+"istx="+Date.now(),{mode:"no-cors",cache:"no-store",signal:ctl.signal})
+    .then(function(){clearTimeout(tm);onProbe(true,performance.now()-s)})
+    .catch(function(){clearTimeout(tm);onProbe(false,0)})
+    .then(function(){fallbackBusy=false;fallbackTimer=setTimeout(fallbackProbe,cfg.int)});
+}
+
+function start(){
+  if(running)return;
+  cfg={dur:parseInt($("#dur").value,10),int:parseInt($("#int").value,10),tgt:$("#tgt").value,wake:$("#wake").checked};
+  if(cfg.tgt==="so"&&location.protocol==="file:"){cfg.tgt="cf";$("#tgt").value="cf"}
+  hstore("cfg",cfg);
+  PROBES=[];outages=[];lostStreak=0;outageOpen=false;warmLeft=2;
+  startAt=Date.now();stopAt=0;running=true;
+  showPage("live");
+  $("#results").classList.add("on");
+  $("#history").classList.remove("on");
+  $("#setup").classList.remove("on");
+  $("#bignum").textContent="-";$("#bignum").className="bignum warm";
+  setStatus("warm");$("#pcount").textContent="0";$("#elapsed").textContent="0:00";
+  $("#remwrap").classList.toggle("hidden",cfg.dur===0);
+  $("#verdict").className="vbox v-init";
+  $("#vword").textContent=t("verH");$("#vtag").classList.add("hidden");
+  $("#vdesc").textContent=t("vNoData");
+  resetStats();renderOutages();updateConnChip();
+  requestWake();
+  var purl=probeUrl();
+  var ok=false;
+  try{
+    var blob=new Blob([WSRC],{type:"text/javascript"});
+    worker=new Worker(URL.createObjectURL(blob));
+    worker.onmessage=function(e){onProbe(e.data.ok===1,e.data.ms||0)};
+    worker.onerror=function(){stopWorker();startFallback()};
+    worker.postMessage({cmd:"start",iv:cfg.int,to:4000,url:purl});
+    ok=true;
+  }catch(e){ok=false}
+  if(!ok)startFallback();
+  else if(navigator.onLine===false)setStatus("off");
+  window.addEventListener("resize",onResize);
+  tickTimer=setInterval(tick,1000);
+}
+function startFallback(){
+  worker=null;fallbackBusy=false;fallbackProbe();
+}
+function stopWorker(){
+  if(worker){try{worker.terminate()}catch(e){}worker=null}
+  if(fallbackTimer){clearTimeout(fallbackTimer);fallbackTimer=null}
+}
+function stop(auto){
+  if(!running)return;
+  running=false;
+  if(outageOpen){outages.push({s:outageStart,e:Date.now()});outageOpen=false}
+  stopWorker();
+  releaseWake();
+  clearInterval(tickTimer);
+  stopAt=Date.now();
+  setStatus(null);
+  showPage("setup");
+  $("#results").classList.add("on");
+  $("#history").classList.add("on");
+  finalize(auto);
+  window.removeEventListener("resize",onResize);
+}
+function onProbe(ok,ms){
+  if(!running)return;
+  var now=Date.now();
+  if(warmLeft>0){warmLeft--;if(warmLeft===0)setStatus(navigator.onLine===false?"off":"on");return}
+  PROBES.push({t:now,ms:ok?Math.round(ms*10)/10:null});
+  if(ok){
+    if(lostStreak>=3&&outageOpen){outages.push({s:outageStart,e:now});outageOpen=false}
+    lostStreak=0;
+    setStatus("on");
+    $("#bignum").textContent=fmtMs(lastOk());
+    $("#bignum").className="bignum";
+  }else{
+    lostStreak++;
+    if(lostStreak===1)maybeStart=now;
+    if(lostStreak>=3&&!outageOpen){outageOpen=true;outageStart=maybeStart}
+    setStatus(navigator.onLine===false?"off":"lost");
+    $("#bignum").textContent="-";$("#bignum").className="bignum lost";
+  }
+  $("#pcount").textContent=PROBES.length;
+  updateStats();drawSpark();drawChart();renderOutages();updateVerdict();
+  if(cfg.dur>0&&now-startAt>=cfg.dur*60000)stop(true);
+}
+function lastOk(){for(var i=PROBES.length-1;i>=0;i--)if(PROBES[i].ms!==null)return PROBES[i].ms;return null}
+
+/* ---------- stats ---------- */
+function stats(){
+  var n=PROBES.length,lost=0,ok=0,sum=0,min=Infinity,max=0,jit=0,jp=0,prev=null;
+  for(var i=0;i<n;i++){
+    var p=PROBES[i];
+    if(p.ms===null){lost++;prev=null;continue}
+    ok++;sum+=p.ms;if(p.ms<min)min=p.ms;if(p.ms>max)max=p.ms;
+    if(prev!==null){jit+=Math.abs(p.ms-prev);jp++}
+    prev=p.ms;
+  }
+  var down=0;for(var k=0;k<outages.length;k++)down+=outages[k].e-outages[k].s;
+  if(outageOpen)down+=Date.now()-outageStart;
+  var el=(stopAt||Date.now())-startAt;
+  return {n:n,ok:ok,lost:lost,lostPct:n?100*lost/n:0,
+          avg:ok?sum/ok:0,min:ok?min:0,max:max,jit:jp?jit/jp:0,
+          el:el,down:down,downPct:el?100*down/el:0,upPct:el?100*(1-down/el):100,
+          outages:outages.slice()};
+}
+function verdictOf(s){
+  if(s.n<10)return null;
+  if(s.lostPct>=5||s.outages.length>=3||s.downPct>=3)return"poor";
+  if(s.lostPct>=1||s.outages.length>=1||s.jit>=40)return"unstable";
+  if(s.lostPct>0||s.jit>=15||s.avg>=150)return"mostly";
+  return"stable";
+}
+function vClass(v){return v==="stable"?"v-stable":(v==="mostly"?"v-mostly":(v==="unstable"?"v-unstable":"v-poor"))}
+function vWord(v){return t("v"+v.charAt(0).toUpperCase()+v.slice(1))}
+
+/* ---------- rendering ---------- */
+var tickTimer=null;
+function showPage(id){
+  $("#setup").classList.toggle("on",id==="setup");
+  $("#live").classList.toggle("on",id==="live");
+}
+function setStatus(mode){
+  statusMode=mode;
+  var el=$("#status"),txt=$("#statusTxt");
+  el.className="st";
+  if(mode==="on"){el.classList.add("st-on");txt.textContent=t("stOn")}
+  else if(mode==="lost"){el.classList.add("st-lost");txt.textContent=t("stLost")}
+  else if(mode==="off"){el.classList.add("st-off");txt.textContent=t("stOff")}
+  else if(mode==="warm"){el.classList.add("st-on");txt.textContent=t("stWarm")}
+}
+function updateLiveText(){}
+function fmtMs(v){return v===null?"-":(v>=100?Math.round(v):Math.round(v*10)/10)}
+function fmtDur(ms){
+  var s=Math.max(0,Math.round(ms/1000)),h=Math.floor(s/3600),m=Math.floor((s%3600)/60),x=s%60;
+  return h>0?(h+":"+String(m).padStart(2,"0")+":"+String(x).padStart(2,"0")):(m+":"+String(x).padStart(2,"0"));
+}
+function tick(){
+  if(!running)return;
+  var el=Date.now()-startAt;
+  $("#elapsed").textContent=fmtDur(el);
+  if(cfg.dur>0)$("#remaining").textContent=fmtDur(cfg.dur*60000-el);
+  if(PROBES.length===0)return;
+}
+function resetStats(){
+  var ids=["sAvg","sJit","sLoss","sUp","sMin","sMax","sOut","sDown"];
+  for(var i=0;i<ids.length;i++)document.getElementById(ids[i]).textContent="-";
+}
+function updateStats(){
+  var s=stats();
+  $("#sAvg").textContent=s.ok?fmtMs(s.avg)+" "+t("unit"):"-";
+  $("#sJit").textContent=s.ok?fmtMs(s.jit)+" "+t("unit"):"-";
+  $("#sLoss").textContent=s.n?s.lost+" ("+(Math.round(s.lostPct*10)/10)+"%)":"-";
+  $("#sUp").textContent=s.el>0?(Math.round(s.upPct*10)/10)+"%":"-";
+  $("#sMin").textContent=s.ok?fmtMs(s.min):"-";
+  $("#sMax").textContent=s.ok?fmtMs(s.max):"-";
+  $("#sOut").textContent=s.outages.length+"";
+  $("#sDown").textContent=s.el>0?fmtDur(s.down):"-";
+}
+function updateVerdict(){
+  var s=stats(),v=verdictOf(s);
+  if(!v)return;
+  $("#verdict").className="vbox "+vClass(v);
+  $("#vword").textContent=vWord(v);
+  var tag=$("#vtag");tag.className="vtag t-"+v;tag.classList.remove("hidden");tag.textContent=vWord(v);
+  $("#vdesc").textContent=t("v"+v.charAt(0).toUpperCase()+v.slice(1)+"D");
+}
+function renderOutages(){
+  var wrap=$("#outwrap");
+  if(!outages.length&&!outageOpen){wrap.classList.add("hidden");return}
+  wrap.classList.remove("hidden");
+  var list=$("#outlist");list.textContent="";
+  for(var i=0;i<outages.length;i++){
+    var o=outages[i];
+    var row=document.createElement("div");row.className="outrow";
+    var a=document.createElement("span");
+    var d=new Date(o.s);
+    a.textContent=d.toLocaleTimeString(LOCALE[lang]||"en-GB")+" - "+new Date(o.e).toLocaleTimeString(LOCALE[lang]||"en-GB");
+    var b=document.createElement("span");b.className="dur";b.textContent=fmtDur(o.e-o.s);
+    row.appendChild(a);row.appendChild(b);list.appendChild(row);
+  }
+  if(outageOpen){
+    var row2=document.createElement("div");row2.className="outrow";
+    var a2=document.createElement("span");a2.textContent=new Date(outageStart).toLocaleTimeString(LOCALE[lang]||"en-GB")+" - ...";
+    var b2=document.createElement("span");b2.className="dur";b2.textContent=fmtDur(Date.now()-outageStart);
+    row2.appendChild(a2);row2.appendChild(b2);list.appendChild(row2);
+  }
+}
+function updateConnChip(){
+  var chip=$("#connchip"),c=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
+  if(!c||!c.effectiveType){chip.classList.add("hidden");return}
+  var txt=c.effectiveType;
+  if(c.downlink)txt+=" · ~"+c.downlink+" Mb/s";
+  if(c.rtt)txt+=" · "+c.rtt+" "+t("unit");
+  txt+=" ("+t("connEst")+")";
+  chip.textContent=txt;chip.classList.remove("hidden");
+}
+function onResize(){drawSpark();drawChart()}
+
+/* ---------- canvas ---------- */
+function setupCanvas(cv,h){
+  var dpr=window.devicePixelRatio||1;
+  var w=cv.clientWidth||600;
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+  var ctx=cv.getContext("2d");
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  return{ctx:ctx,w:w,h:h};
+}
+function themeColors(){
+  var dark=document.documentElement.getAttribute("data-theme")==="dark";
+  return{
+    text:dark?"#9db8ac":"#5e7a6e",line:dark?"#2c3d35":"#dbe5dd",
+    grid:dark?"#26332c":"#e4ece5",avg:dark?"#2dd4bf":"#0f766e",
+    okc:"#34a853",midc:"#f2a600",badc:"#e04b3a",lostc:"#b3261e",
+    outband:"rgba(224,75,58,"+(dark?"0.20":"0.14")+")",outline:"rgba(224,75,58,0.55)"
+  };
+}
+function drawSpark(){
+  var cv=$("#spark");if(!cv)return;
+  var c=setupCanvas(cv,104),col=themeColors();
+  c.ctx.clearRect(0,0,c.w,c.h);
+  var data=PROBES.slice(-80);
+  if(!data.length)return;
+  var xs=c.w/(Math.max(data.length-1,1));
+  var maxv=60;
+  for(var i=0;i<data.length;i++)if(data[i].ms!==null&&data[i].ms>maxv)maxv=data[i].ms;
+  maxv*=1.15;
+  var y=function(ms){return c.h-6-(ms/maxv)*(c.h-16)};
+  c.ctx.strokeStyle=col.grid;c.ctx.lineWidth=1;
+  var g60=y(60);
+  if(g60>4&&g60<c.h-4){c.ctx.beginPath();c.ctx.moveTo(0,g60);c.ctx.lineTo(c.w,g60);c.ctx.stroke()}
+  var s=stats();
+  if(s.ok){
+    c.ctx.strokeStyle=col.avg;c.ctx.setLineDash([4,4]);c.ctx.beginPath();
+    c.ctx.moveTo(0,y(Math.min(s.avg,maxv)));c.ctx.lineTo(c.w,y(Math.min(s.avg,maxv)));c.ctx.stroke();c.ctx.setLineDash([]);
+  }
+  for(var j=0;j<data.length;j++){
+    var x=j*xs,p=data[j];
+    if(p.ms===null){
+      c.ctx.fillStyle=col.lostc;c.ctx.fillRect(x-1,4,2,8);
+    }else{
+      c.ctx.fillStyle=p.ms<60?col.okc:(p.ms<150?col.midc:col.badc);
+      c.ctx.beginPath();c.ctx.arc(x,y(p.ms),2,0,6.2832);c.ctx.fill();
+    }
+  }
+}
+function drawChart(){
+  var cv=$("#chart");if(!cv)return;
+  var c=setupCanvas(cv,234),col=themeColors();
+  c.ctx.clearRect(0,0,c.w,c.h);
+  if(!PROBES.length)return;
+  var t0=PROBES[0].t,t1=PROBES[PROBES.length-1].t;
+  if(t1-t0<1000)t1=t0+1000;
+  var padL=44,padR=8,padT=10,padB=18;
+  var iw=c.w-padL-padR,ih=c.h-padT-padB;
+  var oks=[];
+  for(var a=0;a<PROBES.length;a++)if(PROBES[a].ms!==null)oks.push(PROBES[a].ms);
+  oks.sort(function(x,y){return x-y});
+  var p95=oks.length?oks[Math.floor((oks.length-1)*0.95)]:60;
+  var maxv=Math.max(60,p95*1.25);
+  var X=function(tt){return padL+((tt-t0)/(t1-t0))*iw};
+  var Y=function(ms){return padT+ih-(Math.min(ms,maxv)/maxv)*ih};
+  c.ctx.strokeStyle=col.grid;c.ctx.fillStyle=col.text;c.ctx.font="10px 'Segoe UI',system-ui,sans-serif";c.ctx.lineWidth=1;
+  for(var g=0;g<=4;g++){
+    var gv=maxv*g/4,gy=Y(gv);
+    c.ctx.beginPath();c.ctx.moveTo(padL,gy);c.ctx.lineTo(c.w-padR,gy);c.ctx.stroke();
+    c.ctx.textAlign="right";c.ctx.fillText(Math.round(gv),padL-6,gy+3);
+  }
+  var bands=outages.slice();
+  if(outageOpen)bands.push({s:outageStart,e:t1});
+  for(var b=0;b<bands.length;b++){
+    var bx0=X(Math.max(bands[b].s,t0)),bx1=X(Math.min(bands[b].e,t1));
+    if(bx1-bx0<2)bx1=bx0+2;
+    c.ctx.fillStyle=col.outband;c.ctx.fillRect(bx0,padT,bx1-bx0,ih);
+    c.ctx.strokeStyle=col.outline;c.ctx.beginPath();c.ctx.moveTo(bx0,padT);c.ctx.lineTo(bx0,padT+ih);c.ctx.stroke();
+  }
+  for(var i2=0;i2<PROBES.length;i2++){
+    var p2=PROBES[i2],px=X(p2.t);
+    if(p2.ms===null){
+      c.ctx.strokeStyle=col.lostc;c.ctx.lineWidth=1.5;
+      c.ctx.beginPath();c.ctx.moveTo(px-3,padT+2);c.ctx.lineTo(px+3,padT+8);c.ctx.moveTo(px+3,padT+2);c.ctx.lineTo(px-3,padT+8);c.ctx.stroke();
+    }else{
+      c.ctx.fillStyle=p2.ms<60?col.okc:(p2.ms<150?col.midc:col.badc);
+      c.ctx.beginPath();c.ctx.arc(px,Y(p2.ms),1.8,0,6.2832);c.ctx.fill();
+    }
+  }
+  var s=stats();
+  if(s.ok){
+    c.ctx.strokeStyle=col.avg;c.ctx.setLineDash([4,4]);c.ctx.lineWidth=1.2;
+    c.ctx.beginPath();c.ctx.moveTo(padL,Y(Math.min(s.avg,maxv)));c.ctx.lineTo(c.w-padR,Y(Math.min(s.avg,maxv)));c.ctx.stroke();c.ctx.setLineDash([]);
+  }
+  c.ctx.fillStyle=col.text;c.ctx.textAlign="left";
+  c.ctx.fillText(new Date(t0).toLocaleTimeString(LOCALE[lang]||"en-GB",{hour:"2-digit",minute:"2-digit"}),padL,c.h-5);
+  c.ctx.textAlign="right";
+  c.ctx.fillText(new Date(t1).toLocaleTimeString(LOCALE[lang]||"en-GB",{hour:"2-digit",minute:"2-digit"}),c.w-padR,c.h-5);
+}
+
+/* ---------- export ---------- */
+function buildReport(){
+  var s=stats(),v=verdictOf(s);
+  var lines=[];
+  lines.push(t("repTitle"));
+  lines.push(t("repStarted")+": "+new Date(startAt).toLocaleString(LOCALE[lang]||"en-GB"));
+  lines.push(t("repDuration")+": "+fmtDur(s.el)+(cfg.dur>0?(" / "+cfg.dur+" min"):""));
+  lines.push(t("repInterval")+": "+(cfg.int/1000)+" s · "+t("repTarget")+": "+(cfg.tgt==="so"?"this site":TARGETS[cfg.tgt].name));
+  lines.push(t("repProbes")+": "+s.n+" · "+s.ok+" ok · "+s.lost+" "+t("sLoss").toLowerCase()+" ("+(Math.round(s.lostPct*10)/10)+"%)");
+  lines.push(t("repLatency")+": "+t("sAvg")+" "+fmtMs(s.avg)+" "+t("unit")+" · "+t("sMin")+" "+fmtMs(s.min)+" · "+t("sMax")+" "+fmtMs(s.max)+" · "+t("sJit")+" "+fmtMs(s.jit)+" "+t("unit"));
+  lines.push(t("repUptime")+": "+(Math.round(s.upPct*10)/10)+"% · "+t("repOutages")+": "+s.outages.length+(s.outages.length?" (max "+fmtDur(longestOutage())+")":""));
+  lines.push(t("repVerdict")+": "+(v?vWord(v):"-"));
+  lines.push("");
+  lines.push(t("repGen"));
+  return lines.join("\n");
+}
+function longestOutage(){
+  var m=0;for(var i=0;i<outages.length;i++)if(outages[i].e-outages[i].s>m)m=outages[i].e-outages[i].s;
+  return m;
+}
+function copyReport(){
+  var txt=buildReport();
+  function done(){
+    var n=$("#copiednote");n.style.display="block";
+    setTimeout(function(){n.style.display="none"},1600);
+  }
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(done,function(){legacyCopy(txt,done)});
+  }else legacyCopy(txt,done);
+}
+function legacyCopy(txt,done){
+  var ta=document.createElement("textarea");
+  ta.value=txt;ta.style.position="fixed";ta.style.opacity="0";
+  document.body.appendChild(ta);ta.select();
+  try{document.execCommand("copy")}catch(e){}
+  document.body.removeChild(ta);done();
+}
+function downloadJSON(){
+  var s=stats(),v=verdictOf(s);
+  var data={
+    app:"internet-stability-test",version:1,
+    started:new Date(startAt).toISOString(),ended:new Date((stopAt||Date.now())).toISOString(),
+    durationMs:s.el,intervalMs:cfg.int,target:cfg.tgt==="so"?"self":TARGETS[cfg.tgt].name,
+    stats:{probes:s.n,ok:s.ok,lost:s.n-s.ok,lostPct:s.lostPct,avgMs:Math.round(s.avg*10)/10,minMs:s.min,maxMs:s.max,
+           jitterMs:Math.round(s.jit*10)/10,uptimePct:s.upPct,outages:s.outages.length,downMs:s.down},
+    verdict:v||null,
+    outages:outages,
+    probes:PROBES.map(function(p){return[p.t,p.ms===null?null:p.ms]})
+  };
+  var blob=new Blob([JSON.stringify(data)],{type:"application/json"});
+  var a=document.createElement("a");
+  var d=new Date(startAt);
+  function z(n){return String(n).padStart(2,"0")}
+  a.download="stability-"+d.getFullYear()+z(d.getMonth()+1)+z(d.getDate())+"-"+z(d.getHours())+z(d.getMinutes())+".json";
+  a.href=URL.createObjectURL(blob);
+  document.body.appendChild(a);a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);document.body.removeChild(a)},400);
+}
+
+/* ---------- history ---------- */
+function histRuns(){return hstore("runs")||[]}
+function finalize(auto){
+  var s=stats(),v=verdictOf(s);
+  if(s.n>0){
+    var runs=histRuns();
+    runs.unshift({at:startAt,el:s.el,n:s.n,lostPct:Math.round(s.lostPct*10)/10,avg:Math.round(s.avg*10)/10,
+                  jit:Math.round(s.jit*10)/10,up:Math.round(s.upPct*10)/10,out:s.outages.length,v:v||"poor"});
+    if(runs.length>12)runs.length=12;
+    hstore("runs",runs);
+  }
+  renderHistory();
+  updateVerdict();updateStats();drawChart();drawSpark();
+  if(auto)$("#results").scrollIntoView({behavior:"smooth"});
+}
+function renderHistory(){
+  var runs=histRuns(),list=$("#histlist"),empty=$("#histempty");
+  list.textContent="";
+  empty.style.display=runs.length?"none":"block";
+  $("#clearbtn").classList.toggle("hidden",!runs.length);
+  for(var i=0;i<runs.length;i++){
+    (function(run,idx){
+      var row=document.createElement("div");row.className="histrow";
+      var when=document.createElement("span");when.className="when";
+      when.textContent=new Date(run.at).toLocaleString(LOCALE[lang]||"en-GB",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
+      var tag=document.createElement("span");tag.className="vtag t-"+run.v;tag.textContent=vWord(run.v);
+      var nums=document.createElement("span");nums.className="nums";
+      nums.textContent=fmtDur(run.el)+" · "+t("sAvg")+" "+run.avg+" "+t("unit")+" · "+t("sJit")+" "+run.jit+" "+t("unit")+" · "+t("sLoss")+" "+run.lostPct+"% · "+t("sUp")+" "+run.up+"%";
+      var del=document.createElement("button");del.className="del";del.title=t("delOne");del.textContent="×";
+      del.setAttribute("aria-label",t("delOne"));
+      del.onclick=function(){
+        var r2=histRuns();r2.splice(idx,1);hstore("runs",r2);renderHistory();
+      };
+      row.appendChild(when);row.appendChild(tag);row.appendChild(nums);row.appendChild(del);
+      list.appendChild(row);
+    })(runs[i],i);
+  }
+}
+function armClear(btn){
+  var armed=false;
+  btn.onclick=function(){
+    if(!armed){armed=true;btn.textContent=t("reallyBtn");setTimeout(function(){armed=false;btn.textContent=t("clearBtn")},2600)}
+    else{armed=false;hstore("runs",null);btn.textContent=t("clearBtn");renderHistory()}
+  };
+}
+
+/* ---------- wake lock ---------- */
+function requestWake(){
+  releaseWake();
+  if(!cfg.wake||!("wakeLock" in navigator))return;
+  navigator.wakeLock.request("screen").then(function(wl){
+    wakeLock=wl;
+    wl.addEventListener("release",function(){wakeLock=null});
+  },function(){wakeLock=null});
+}
+function releaseWake(){if(wakeLock){try{wakeLock.release()}catch(e){}wakeLock=null}}
+document.addEventListener("visibilitychange",function(){if(running&&!document.hidden)requestWake()});
+
+/* ---------- init ---------- */
+(function init(){
+  var saved=hstore("cfg");
+  if(saved&&saved.dur!==undefined){
+    cfg=saved;
+    try{
+      $("#dur").value=String(cfg.dur);$("#int").value=String(cfg.int);$("#tgt").value=cfg.tgt;
+      $("#wake").checked=!!cfg.wake;
+    }catch(e){}
+  }
+  if(location.protocol==="file:"){
+    var so=$("#tgt").querySelector('option[value="so"]');
+    if(so){so.disabled=true}
+    if(cfg.tgt==="so"){$("#tgt").value="cf";cfg.tgt="cf"}
+  }
+  if("wakeLock" in navigator)$("#wakewrap").classList.remove("hidden");
+  var btns=document.querySelectorAll(".langbtn");
+  for(var i=0;i<btns.length;i++)(function(b){b.onclick=function(){setLang(b.getAttribute("data-lang"))}})(btns[i]);
+  $("#themebtn").onclick=function(){setTheme(document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark")};
+  $("#startbtn").onclick=start;
+  $("#stopbtn").onclick=function(){stop(false)};
+  $("#copybtn").onclick=copyReport;
+  $("#dlbtn").onclick=downloadJSON;
+  armClear($("#clearbtn"));
+  window.addEventListener("online",function(){if(running)setStatus("on")});
+  window.addEventListener("offline",function(){if(running)setStatus("off")});
+  window.addEventListener("beforeunload",function(e){if(running){e.preventDefault();e.returnValue=""}});
+  var navLang=(navigator.language||"en").toLowerCase();
+  var pick=store("lang")||(navLang.indexOf("ro")===0?"ro":(navLang.indexOf("sr")===0?"sr-latn":"en"));
+  setTheme(store("theme")||(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"));
+  setLang(pick);
+  $("#history").classList.add("on");
+  renderHistory();
+  updateConnChip();
+})();
+</script>
+</body>
+</html>
