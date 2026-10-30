@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Internet Stability Test">
+  <rect width="512" height="512" rx="96" fill="#0f766e"/>
+  <circle cx="256" cy="256" r="40" fill="#e8f2ec"/>
+  <path d="M256 216a40 40 0 0 0-40 40" stroke="#e8f2ec" stroke-width="0" fill="none"/>
+  <path d="M176 256a80 80 0 0 1 160 0" fill="none" stroke="#a7f3d0" stroke-width="24" stroke-linecap="round"/>
+  <path d="M136 256a120 120 0 0 1 240 0" fill="none" stroke="#5eead4" stroke-width="24" stroke-linecap="round"/>
+  <path d="M96 256a160 160 0 0 1 320 0" fill="none" stroke="#2dd4bf" stroke-width="24" stroke-linecap="round" opacity=".6"/>
+</svg>

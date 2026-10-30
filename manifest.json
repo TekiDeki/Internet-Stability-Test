@@ -1,0 +1,14 @@
+{
+  "name": "Internet Stability Test",
+  "short_name": "Stability",
+  "description": "Continuous latency probes measure jitter, lost probes and outages, with a verdict and the thresholds shown.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f3ec",
+  "theme_color": "#0f766e",
+  "lang": "en",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

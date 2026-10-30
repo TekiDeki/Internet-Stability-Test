@@ -9,6 +9,8 @@
 <link rel="canonical" href="https://tekideki.github.io/Internet-Stability-Test/">
 <meta name="description" content="Continuous latency probes measure the real stability of your connection: jitter, lost probes, outages and uptime. One HTML file, no account, nothing uploaded.">
 <meta name="theme-color" content="#f6f3ec">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
 <meta property="og:title" content="Internet Stability Test · jitter, loss and outages, measured in your browser">
 <meta property="og:description" content="Continuous latency probes measure the real stability of your connection: jitter, lost probes, outages and uptime.">
 <meta property="og:type" content="website">
@@ -1023,6 +1025,15 @@ document.addEventListener("visibilitychange",function(){if(running&&!document.hi
   renderHistory();
   updateConnChip();
 })();
+</script>
+<script>
+/* Offline shell: shell-ul se incarca si fara retea, ca sa poti citi verdictul din ultima sesiune.
+   Masuratoarea in sine are nevoie de conexiune - si spune asta. */
+if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("sw.js").catch(function () {});
+  });
+}
 </script>
 </body>
 </html>
