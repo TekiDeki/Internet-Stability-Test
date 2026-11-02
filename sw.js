@@ -6,7 +6,7 @@
  * open on a plane or in a basement and say so, instead of showing the browser's error page.
  * Nothing is cached except this app's own files. Bump VERSION when index.html changes.
  */
-var VERSION = '2';
+var VERSION = '3';
 var CACHE = 'internet-stability-v' + VERSION;
 var ASSETS = ['./', './index.html', './manifest.json', './icon.svg'];
 

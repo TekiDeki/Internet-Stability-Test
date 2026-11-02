@@ -1014,7 +1014,7 @@ function finalize(auto){
     if(runs.length>12)runs.length=12;
     hstore("runs",runs);
   }
-  renderHistory();
+  renderHistory();renderOutages();
   updateVerdict();updateStats();drawChart();drawSpark();
   if(auto)$("#results").scrollIntoView({behavior:"smooth"});
 }
