@@ -142,7 +142,7 @@ canvas{display:block;width:100%;border-radius:12px;background:var(--panel2);bord
 .vhead{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .vword{font-size:1.35rem;font-weight:900;letter-spacing:-.01em}
 .vtag{font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:4px 12px;color:#fff}
-.t-stable{background:#1a7f42}.t-mostly{background:#0f766e}.t-unstable{background:#92610a}.t-poor{background:#b3261e}
+.t-stable{background:#1a7f42}.t-mostly{background:#0f766e}.t-unstable{background:#92610a}.t-poor{background:#b3261e}.t-short{background:#5e7a6e}
 .vdesc{margin-top:8px;font-size:.95rem;line-height:1.6}
 .thresh{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);font-size:.82rem;color:var(--muted);line-height:1.7}
 .outrow{display:flex;justify-content:space-between;gap:10px;padding:9px 4px;border-bottom:1px solid var(--line);font-size:.9rem;flex-wrap:wrap}
@@ -206,7 +206,7 @@ footer .sep{margin:0 7px;opacity:.45}
     min-height: 44px !important;
   }
   html body :is(button, [role="button"], .btn, .button, .chip, .langbtn, .iconbtn, .icon-btn,
-      .btn-icon, .icon-button, .swatch, .switch, .tbtn, .buy, .skip):not(.cell):not(.tile):not(.slot):not(.key) {
+      .btn-icon, .icon-button, .swatch, .switch, .tbtn, .buy, .skip):not(.cell):not(.tile):not(.slot):not(.key):not(.hidden):not([hidden]) {
     display: inline-flex !important; align-items: center !important; justify-content: center !important;
   }
   html body :is(.iconbtn, .icon-btn, .btn-icon, .icon-button, .langbtn, .theme-toggle, .theme,
@@ -421,7 +421,7 @@ var L={
  sAvg:"average", sJit:"jitter", sLoss:"lost probes", sUp:"uptime", sMin:"minimum", sMax:"maximum", sOut:"outages", sDown:"downtime",
  chartH:"Timeline", legOK:"under 60 ms", legMid:"under 150 ms", legBad:"over 150 ms", legLost:"lost probe", legOut:"outage",
  verH:"Verdict", vNoData:"Not enough probes yet - the verdict appears once the first ones land.",
- vStable:"Stable", vMostly:"Mostly stable", vUnstable:"Unstable", vPoor:"Poor connection",
+ vStable:"Stable", vMostly:"Mostly stable", vUnstable:"Unstable", vPoor:"Poor connection", vShort:"No verdict",
  vStableD:"No lost probes, no outages, low jitter. This is what a healthy line looks like.",
  vMostlyD:"Solid overall, with spikes. Isolated spikes usually come from Wi-Fi or the router; a cable usually removes them.",
  vUnstableD:"Latency jumps or probes are being lost. Restart the router, prefer a cable and pause heavy uploads - both make this worse.",
@@ -464,7 +464,7 @@ var L={
  sAvg:"medie", sJit:"jitter", sLoss:"sonde pierdute", sUp:"timp activ", sMin:"minim", sMax:"maxim", sOut:"căderi", sDown:"timp căzut",
  chartH:"Cronologie", legOK:"sub 60 ms", legMid:"sub 150 ms", legBad:"peste 150 ms", legLost:"sondă pierdută", legOut:"cădere",
  verH:"Verdict", vNoData:"Încă prea puține sonde - verdictul apare după ce aterizează primele.",
- vStable:"Stabilă", vMostly:"În mare stabilă", vUnstable:"Instabilă", vPoor:"Conexiune slabă",
+ vStable:"Stabilă", vMostly:"În mare stabilă", vUnstable:"Instabilă", vPoor:"Conexiune slabă", vShort:"Fără verdict",
  vStableD:"Zero sonde pierdute, zero căderi, jitter mic. Așa arată o linie sănătoasă.",
  vMostlyD:"Solidă în ansamblu, cu vârfuri izolate. Vârfurile vin de obicei din Wi-Fi sau din router; un cablu le elimină de regulă.",
  vUnstableD:"Latența sare sau sondele se pierd. Repornește routerul, preferă cablul și pune pe pauză încărcările mari - le înrăutățesc pe ambele.",
@@ -507,7 +507,7 @@ var L={
  sAvg:"просек", sJit:"џитер", sLoss:"изгубљене сонде", sUp:"време рада", sMin:"минимум", sMax:"максимум", sOut:"прекиди", sDown:"време прекида",
  chartH:"Временска линија", legOK:"испод 60 мс", legMid:"испод 150 мс", legBad:"преко 150 мс", legLost:"изгубљена сонда", legOut:"прекид",
  verH:"Пресуда", vNoData:"Још премало сонди - пресуда се појављује кад стигну прве.",
- vStable:"Стабилна", vMostly:"Углавном стабилна", vUnstable:"Нестабилна", vPoor:"Лоша веза",
+ vStable:"Стабилна", vMostly:"Углавном стабилна", vUnstable:"Нестабилна", vPoor:"Лоша веза", vShort:"Без пресуде",
  vStableD:"Ниједна сонда изгубљена, ниједан прекид, мали џитер. Овако изгледа здрава линија.",
  vMostlyD:"Солидна у целини, са појединачним скоковима. Скокови обично долазе од Wi-Fi-ја или рутера; кабл их обично уклања.",
  vUnstableD:"Латенција скаче или се сонде губе. Поново покрени рутер, преферирај кабл и заустави велика отпремања - и једно и друго то погоршава.",
@@ -550,7 +550,7 @@ var L={
  sAvg:"prosek", sJit:"džiter", sLoss:"izgubljene sonde", sUp:"vreme rada", sMin:"minimum", sMax:"maksimum", sOut:"prekidi", sDown:"vreme prekida",
  chartH:"Vremenska linija", legOK:"ispod 60 ms", legMid:"ispod 150 ms", legBad:"preko 150 ms", legLost:"izgubljena sonda", legOut:"prekid",
  verH:"Presuda", vNoData:"Još premalo sondi - presuda se pojavljuje kad stignu prve.",
- vStable:"Stabilna", vMostly:"Uglavnom stabilna", vUnstable:"Nestabilna", vPoor:"Loša veza",
+ vStable:"Stabilna", vMostly:"Uglavnom stabilna", vUnstable:"Nestabilna", vPoor:"Loša veza", vShort:"Bez presude",
  vStableD:"Nijedna sonda izgubljena, nijedan prekid, mali džiter. Ovako izgleda zdrava linija.",
  vMostlyD:"Solidna u celini, sa pojedinačnim skokovima. Skokovi obično dolaze od Wi-Fi-ja ili rutera; kabl ih obično uklanja.",
  vUnstableD:"Latencija skače ili se sonde gube. Ponovo pokreni ruter, preferiraj kabl i zaustavi velika otpremanja - i jedno i drugo to pogoršava.",
@@ -1010,7 +1010,7 @@ function finalize(auto){
   if(s.n>0){
     var runs=histRuns();
     runs.unshift({at:startAt,el:s.el,n:s.n,lostPct:Math.round(s.lostPct*10)/10,avg:Math.round(s.avg*10)/10,
-                  jit:Math.round(s.jit*10)/10,up:Math.round(s.upPct*10)/10,out:s.outages.length,v:v||"poor"});
+                  jit:Math.round(s.jit*10)/10,up:Math.round(s.upPct*10)/10,out:s.outages.length,v:v||"short"});
     if(runs.length>12)runs.length=12;
     hstore("runs",runs);
   }

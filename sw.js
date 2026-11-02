@@ -6,7 +6,7 @@
  * open on a plane or in a basement and say so, instead of showing the browser's error page.
  * Nothing is cached except this app's own files. Bump VERSION when index.html changes.
  */
-var VERSION = '1';
+var VERSION = '2';
 var CACHE = 'internet-stability-v' + VERSION;
 var ASSETS = ['./', './index.html', './manifest.json', './icon.svg'];
 
@@ -26,7 +26,10 @@ self.addEventListener('activate', function (event) {
 
 self.addEventListener('fetch', function (event) {
   var request = event.request;
-  if (request.method !== 'GET' || new URL(request.url).origin !== self.location.origin) return;
+  var url = new URL(request.url);
+  /* Probes must reach the network. Caching them would report cached shell hits as a healthy line. */
+  if (url.searchParams.has('ist') || url.searchParams.has('istx')) return;
+  if (request.method !== 'GET' || url.origin !== self.location.origin) return;
   event.respondWith(caches.open(CACHE).then(function (cache) {
     return cache.match(request, { ignoreSearch: true }).then(function (cached) {
       var network = fetch(request).then(function (response) {
