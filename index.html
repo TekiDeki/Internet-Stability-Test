@@ -53,6 +53,7 @@ body{
 .iconbtn{border-radius:50%;width:36px;height:36px;padding:0;font-size:1rem;display:flex;align-items:center;justify-content:center}
 .langbtn:hover,.iconbtn:hover,.homelink:hover{color:var(--text);border-color:var(--accent)}
 .langbtn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+[data-theme="dark"] .langbtn[aria-pressed="true"]{color:var(--bg)}
 .homelink{display:inline-flex;align-items:center;border-radius:999px;padding:6px 13px;text-decoration:none}
 button:focus-visible,a:focus-visible,select:focus-visible{outline:3px solid var(--ring);outline-offset:2px;border-radius:8px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);overflow:hidden;margin:12px 0}
@@ -103,6 +104,7 @@ select:disabled{opacity:.5;cursor:not-allowed}
 .bigbtn:hover{filter:brightness(1.06)}
 .bigbtn:disabled{opacity:.55;cursor:not-allowed;box-shadow:none}
 .stopbtn{background:linear-gradient(140deg,#9f2f24 0%,#c03d2e 100%);box-shadow:0 10px 24px rgba(159,47,36,.25)}
+[data-theme="dark"] .bigbtn:not(.stopbtn){color:var(--bg)}
 .note{font-size:.83rem;color:var(--muted);margin-top:10px;line-height:1.55}
 .livebar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:6px}
 .st{display:inline-flex;align-items:center;gap:8px;font-size:.82rem;font-weight:800;letter-spacing:.03em;border-radius:999px;padding:6px 14px;border:1px solid var(--line);background:var(--panel2);color:var(--muted);text-transform:uppercase}
@@ -1109,16 +1111,16 @@ if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
 <!-- Buton de instalare TekiDeki (Apache-2.0). Sursa: studio/unelte/install-app/ - acelasi bloc în toate uneltele. -->
 <style>
 /* App-scoped install controls. Uses each app's existing theme; no external assets. */
-#td-install-section{box-sizing:border-box;width:100%;max-width:1160px;flex-shrink:0;text-align:center;margin:24px auto 16px;padding:0 16px;color:var(--text,var(--text-color,#17233b))}
+#td-install-section{box-sizing:border-box;width:100%;max-width:1160px;flex-shrink:0;text-align:center;margin:24px auto 16px;padding:0 16px;color:var(--text,var(--text-color,var(--ink,#17233b)))}
 #td-install-section[hidden],#td-install-dialog [hidden]{display:none!important}
-#td-install-button,#td-install-close{box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:9px;width:auto;max-width:100%;min-height:46px;padding:11px 20px;border:1px solid var(--border,var(--border-color,#aab6c6));border-radius:12px;background:var(--card,var(--card-bg,var(--bg-2,#fff)));color:var(--text,var(--text-color,#17233b));font:600 14px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;letter-spacing:normal;cursor:pointer;text-transform:none;white-space:normal;overflow-wrap:anywhere;box-shadow:0 2px 8px #0000000a;touch-action:manipulation}
+#td-install-button,#td-install-close{box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:9px;width:auto;max-width:100%;min-height:46px;padding:11px 20px;border:1px solid var(--line,var(--border,var(--border-color,#aab6c6)));border-radius:12px;background:var(--panel,var(--surface,var(--card,var(--card-bg,var(--bg-2,#fff)))));color:var(--text,var(--text-color,var(--ink,#17233b)));font:600 14px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;letter-spacing:normal;cursor:pointer;text-transform:none;white-space:normal;overflow-wrap:anywhere;box-shadow:0 2px 8px #0000000a;touch-action:manipulation}
 #td-install-button:hover,#td-install-close:hover{box-shadow:0 3px 14px #00000020}
 #td-install-button:focus-visible,#td-install-close:focus-visible{outline:3px solid currentColor;outline-offset:4px}
 #td-install-button:disabled{opacity:.65;cursor:wait}
 #td-install-button svg{flex:0 0 20px;width:20px;height:20px}
 #td-install-status{font:400 13px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:inherit;max-width:600px;margin:10px auto 0;overflow-wrap:anywhere}
 #td-install-status:empty{display:none}
-#td-install-dialog{box-sizing:border-box;position:fixed;inset:0;width:480px;max-width:calc(100vw - 32px);max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);margin:auto;padding:24px;border:1px solid var(--border,var(--border-color,#aab6c6));border-radius:18px;background:var(--card,var(--card-bg,var(--bg-2,#fff)));color:var(--text,var(--text-color,#17233b));box-shadow:0 16px 64px #00000050;text-align:left;font:400 14px/1.65 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overflow:auto;overflow-wrap:anywhere}
+#td-install-dialog{box-sizing:border-box;position:fixed;inset:0;width:480px;max-width:calc(100vw - 32px);max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);margin:auto;padding:24px;border:1px solid var(--line,var(--border,var(--border-color,#aab6c6)));border-radius:18px;background:var(--panel,var(--surface,var(--card,var(--card-bg,var(--bg-2,#fff)))));color:var(--text,var(--text-color,var(--ink,#17233b)));box-shadow:0 16px 64px #00000050;text-align:left;font:400 14px/1.65 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overflow:auto;overflow-wrap:anywhere}
 #td-install-dialog::backdrop{background:#0009}
 #td-install-title{font:700 21px/1.3 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:inherit;margin:0 0 14px;letter-spacing:normal}
 #td-install-dialog p{font:inherit;color:inherit;margin:0 0 14px}
